@@ -31,11 +31,11 @@ jobs:
 
         # Run the Python Script
       - name: Run Python Script
-        run: python main.py
+        run: python python/main.py
 
         # Check code quality
       - name: Check Python Code Quality
-        run: python -m py_compile main.py
+        run: python -m py_compile python/main.py
 
         # Run pytest for tests directory
       - name: Run Pytest
