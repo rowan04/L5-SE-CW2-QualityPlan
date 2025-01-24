@@ -20,6 +20,8 @@ logs
 # local files
 *.local
 *.local.yaml
+
+# Python files
 .python-version
 *.cpython*
 
