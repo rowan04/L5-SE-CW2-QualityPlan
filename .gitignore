@@ -20,6 +20,8 @@ logs
 # local files
 *.local
 *.local.yaml
+.python-version
+*.cpython*
 
 # Temporary change files created by Vim
 *.swp
