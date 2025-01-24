@@ -1,0 +1,26 @@
+name: Run Python Smart Home App
+
+# Run tests when anything is pushed to the main branch, or a PR to main
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  run-python-script:
+    # Run on Ubuntu OS
+    runs-on: ubuntu-latest
+
+    steps:
+        # Download code from GitHub
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+        # Run the Python Script
+      - name: Run Python Script
+        run: python main.py 
+
+        # Check code quality
+      - name: Check Python Code Quality
+        run: python -m py_compile main.py
