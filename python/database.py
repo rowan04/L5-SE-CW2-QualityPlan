@@ -157,9 +157,14 @@ class AccessUserDatabase:
                 user = session.query(User).filter_by(id=user_id).first()
                 
                 if user:
-                    user.email = new_email
-                    session.commit()
-                    log.info("User's email updated to %s", new_email)
+                    try:
+                        user.email = new_email
+                        session.commit()
+                        log.info("User's email updated to %s", new_email)
+                    except IntegrityError as e:
+                        session.rollback()
+                        log.error("Error: %s", e.orig)
+                        log.error("Error: Email already exists.")
                 else:
                     log.error("User not found.")
         except Exception as e:
