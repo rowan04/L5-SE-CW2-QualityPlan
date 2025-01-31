@@ -1,1 +1,2 @@
 pytest
+SQLAlchemy>=2.0.0
