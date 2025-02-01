@@ -90,6 +90,18 @@ class SmartHomeApp:
         
         email = email.lower()
         
+        
+        if self.verify_username(username) == "bad":
+            print("email not good")
+            return
+        
+        if self.verify_email(email) == "bad":
+            print("email not good")
+            return
+        if self.verify_password(password, email) == "bad":
+            print("email not good")
+            return
+        
         hashed_password = self.hash_password(password)
 
         self.database.add_user(username, email, hashed_password)
@@ -119,6 +131,9 @@ class SmartHomeApp:
             return
 
         new_email = input("Enter your new email: ")
+        if self.verify_email(new_email) == "bad":
+            print("email not good")
+            return
         self.database.update_email(self.logged_in_user_id, new_email)
         print("Email updated successfully!")
         
