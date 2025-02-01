@@ -26,11 +26,10 @@ class User(Base):
 
 
 class AccessUserDatabase:
-    def __init__(self, db_url='sqlite:///../database/user_database.db'):
+    def __init__(self, db_url='sqlite:///database/user_database.db'):
         self.engine = create_engine(db_url, echo=True)
         self.Session = sessionmaker(bind=self.engine)
-        self.Base = Base
-        self.Base.metadata.create_all(self.engine)  # Create tables if they don't exist
+        Base.metadata.create_all(self.engine)  # Create tables if they don't exist
     
     def get_id_from_email(self, email):
         """
