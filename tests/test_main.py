@@ -2,7 +2,20 @@
 Unit tests for testing the smart home app.
 """
 
-from main import start_smart_home
+from main import SmartHomeApp
+import hashlib
 
-def test_start_smart_home():
-    assert start_smart_home() == "The smart home app is running (whoop whoop)."
+class TestSuccess:
+    def setup_method(self):
+        """
+        pytest method ran before each pytest to set it up
+        """
+        self.app = SmartHomeApp()
+
+    def test_hash_password(self):
+        password = "securepassword123"
+        expected_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        actual_hash = self.app.hash_password(password)
+        
+        assert expected_hash == actual_hash
