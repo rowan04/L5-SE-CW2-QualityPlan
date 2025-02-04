@@ -14,6 +14,7 @@ log.addHandler(handler)  # Adds handler to log
 log.setLevel(logging.INFO)  # Ensure INFO and above are logged
 handler.setLevel(logging.INFO)  # Ensure the handler also logs INFO and above
 
+
 class SmartHomeApp:
     def __init__(self):
         self.database = AccessUserDatabase()
@@ -99,8 +100,8 @@ class SmartHomeApp:
             if stored_password == hashed_password:
                 self.logged_in_user_id = user_id
                 log.info(
-                    "Login successful! Welcome back, %s.", 
-                    self.database.get_username(user_id)
+                    "Login successful! Welcome back, %s.",
+                    self.database.get_username(user_id),
                 )
                 return
         # To protect user's emails and passwords,
