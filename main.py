@@ -140,7 +140,7 @@ class SmartHomeApp:
     def delete_user(self):
         """Deletes the logged in user"""
         if self.logged_in_user_id is None:
-            print("You must be logged in to update your email.")
+            print("You must be logged in to delete your account.")
             return
 
         self.database.delete_user(self.logged_in_user_id)
