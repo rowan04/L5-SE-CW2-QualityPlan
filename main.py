@@ -14,7 +14,7 @@ class SmartHomeApp:
     def hash_password(self, password):
         """Hashes the password using SHA-256."""
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-        return password
+        return hashed_password
     
     def verify_username(self, username):
         good = "good"
