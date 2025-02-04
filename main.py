@@ -2,8 +2,15 @@
 Main functionality for the smart home app.
 """
 
+import logging
+
 from python.database import AccessUserDatabase
 import hashlib
+import re
+
+log = logging.getLogger(__name__)
+handler = logging.StreamHandler()  # Logs to the terminal
+log.addHandler(handler)  # Adds handler to log
 
 
 class SmartHomeApp:
@@ -17,66 +24,45 @@ class SmartHomeApp:
         return hashed_password
 
     def verify_username(self, username):
-        good = "good"
-        if username < 1:
-            good = "bad"
-        else:
-            good = "good"
-            if username > 30:
-                good = "bad"
-            else:
-                good = "good"
-        return good
+        if 1 < len(username) < 30:
+            return True
+        log.info("username must be between 1 and 30 characters.")
+        return False
 
     def verify_email(self, email):
-        good = "good"
-        if "@" in email:
-            good = "good"
-            if "." not in email:
-                good = "bad"
-            else:
-                good = "good"
-        else:
-            good = "bad"
-        return good
+        if re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
+            return True
+        log.info("email did not contain '@' and/or '.'")
+        return False
 
     def verify_password(self, password, email):
-        good = "good"
         weak_passwords = ["password", "123456", "qwerty", "abc123"]
+
         if len(password) < 8:
-            good = "bad"
-        else:
-            good = "good"
-            if password.lower() in weak_passwords:
-                good = "bad"
-            else:
-                good = "good"
-                if email == password.lower():
-                    good = "bad"
-                else:
-                    good = "good"
-                    has_lower = False
-                    has_upper = False
-                    has_digit = False
-                    has_special = False
-                    for c in password:
-                        if c.islower():
-                            has_lower = True
-                        elif c.isupper():
-                            has_upper = True
-                        elif c.isdigit():
-                            has_digit = True
-                        elif c in "!@#$%^&*()_+":
-                            has_special = True
-                    if has_lower == False:
-                        good = "bad"
-                    if has_upper == False:
-                        good = "bad"
-                    if has_digit == False:
-                        good = "bad"
-                    if has_special == False:
-                        good = "bad"
-        return good
+            log.info("Password must be at least 8 characters long.")
+            return False
+
+        if password.lower() in weak_passwords:
+            log.info("Password is too weak.")
+            return False
+
+        if email == password.lower():
+            log.info("Password cannot be the same as the email.")
+            return False
+
+        has_lower = any(c.islower() for c in password)
+        has_upper = any(c.isupper() for c in password)
+        has_digit = any(c.isdigit() for c in password)
+        has_special = any(c in "!@#$%^&*()_+" for c in password)
+
+        if not (has_lower and has_upper and has_digit and has_special):
+            log.info(
+                "Password must contain a mix of lowercase, uppercase, "
+                "digits, and special characters"
+            )
+            return False
+
+        return True
 
     def sign_up(self):
         """Allows a new user to sign up."""
@@ -86,15 +72,13 @@ class SmartHomeApp:
 
         email = email.lower()
 
-        if self.verify_username(username) == "bad":
-            print("email not good")
+        if not self.verify_username(username):
             return
 
-        if self.verify_email(email) == "bad":
-            print("email not good")
+        if not self.verify_email(email):
             return
-        if self.verify_password(password, email) == "bad":
-            print("email not good")
+
+        if not self.verify_password(password, email):
             return
 
         hashed_password = self.hash_password(password)
@@ -129,8 +113,7 @@ class SmartHomeApp:
             return
 
         new_email = input("Enter your new email: ")
-        if self.verify_email(new_email) == "bad":
-            print("email not good")
+        if not self.verify_email(new_email):
             return
         self.database.update_email(self.logged_in_user_id, new_email)
         print("Email updated successfully!")
