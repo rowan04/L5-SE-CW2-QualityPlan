@@ -119,10 +119,9 @@ class SmartHomeApp:
             if stored_password == hashed_password:
                 self.logged_in_user_id = user_id
                 print(f"Login successful! Welcome back, {self.database.get_username(user_id)}.")
-            else:
-                print("Incorrect password.")
-        else:
-            print("No account found with that email.")
+                return
+        # To protect user's emails and passwords, do not specify whether the password or email is incorrect.
+        print("Incorrect email or password.")
 
     def update_email(self):
         """Updates the email of the logged-in user."""
