@@ -23,14 +23,20 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}', email='{self.email}')>"
+        return (
+            f"<User(id={self.id}, "
+            f"username='{self.username}', "
+            f"email='{self.email}')>"
+        )
 
 
 class AccessUserDatabase:
     def __init__(self, db_url="sqlite:///database/user_database.db"):
         self.engine = create_engine(db_url, echo=True)
         self.Session = sessionmaker(bind=self.engine)
-        Base.metadata.create_all(self.engine)  # Create tables if they don't exist
+        
+        # Create tables if they don't exist
+        Base.metadata.create_all(self.engine)
 
     def get_id_from_email(self, email):
         """
@@ -53,7 +59,11 @@ class AccessUserDatabase:
         """
         Adds a new user to the database.
         """
-        new_user = User(username=username, email=email, password_hash=hashed_password)
+        new_user = User(
+            username=username,
+            email=email,
+            password_hash=hashed_password,
+        )
 
         # Using context manager to automatically handle session open/close
         with self.Session() as session:
