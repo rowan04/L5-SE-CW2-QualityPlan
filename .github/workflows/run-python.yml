@@ -30,10 +30,6 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-        # Run the Login Script
-      - name: Run Login Script
-        run: python main.py
-
       # Lint code with Black
       - name: Run Black Formatter Check
         run: black --check .
