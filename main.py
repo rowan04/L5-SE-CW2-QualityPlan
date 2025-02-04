@@ -145,7 +145,7 @@ class SmartHomeApp:
 
         self.database.delete_user(self.logged_in_user_id)
         self.logged_in_user_id = None
-        print("User deleted successfully")
+        print("User deleted successfully.")
 
     def start(self):
         """Main menu for the smart home app."""
