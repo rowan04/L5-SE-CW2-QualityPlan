@@ -15,7 +15,7 @@ class SmartHomeApp:
         """Hashes the password using SHA-256."""
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
         return hashed_password
-    
+
     def verify_username(self, username):
         good = "good"
         if username < 1:
@@ -27,9 +27,7 @@ class SmartHomeApp:
             else:
                 good = "good"
         return good
-                
-        
-    
+
     def verify_email(self, email):
         good = "good"
         if "@" in email:
@@ -41,8 +39,7 @@ class SmartHomeApp:
         else:
             good = "bad"
         return good
-        
-        
+
     def verify_password(self, password, email):
         good = "good"
         weak_passwords = ["password", "123456", "qwerty", "abc123"]
@@ -80,28 +77,26 @@ class SmartHomeApp:
                     if has_special == False:
                         good = "bad"
         return good
-        
 
     def sign_up(self):
         """Allows a new user to sign up."""
         username = input("Enter a username: ")
         email = input("Enter an email: ")
         password = input("Enter a password: ")
-        
+
         email = email.lower()
-        
-        
+
         if self.verify_username(username) == "bad":
             print("email not good")
             return
-        
+
         if self.verify_email(email) == "bad":
             print("email not good")
             return
         if self.verify_password(password, email) == "bad":
             print("email not good")
             return
-        
+
         hashed_password = self.hash_password(password)
 
         self.database.add_user(username, email, hashed_password)
@@ -118,7 +113,9 @@ class SmartHomeApp:
             stored_password = self.database.get_password(user_id)
             if stored_password == hashed_password:
                 self.logged_in_user_id = user_id
-                print(f"Login successful! Welcome back, {self.database.get_username(user_id)}.")
+                print(
+                    f"Login successful! Welcome back, {self.database.get_username(user_id)}."
+                )
                 return
         # To protect user's emails and passwords, do not specify whether the password or email is incorrect.
         print("Incorrect email or password.")
@@ -135,7 +132,7 @@ class SmartHomeApp:
             return
         self.database.update_email(self.logged_in_user_id, new_email)
         print("Email updated successfully!")
-        
+
     def delete_user(self):
         """Deletes the logged in user"""
         if self.logged_in_user_id is None:
