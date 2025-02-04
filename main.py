@@ -11,7 +11,8 @@ import re
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler()  # Logs to the terminal
 log.addHandler(handler)  # Adds handler to log
-
+log.setLevel(logging.INFO)  # Ensure INFO and above are logged
+handler.setLevel(logging.INFO)  # Ensure the handler also logs INFO and above
 
 class SmartHomeApp:
     def __init__(self):
@@ -84,7 +85,7 @@ class SmartHomeApp:
         hashed_password = self.hash_password(password)
 
         self.database.add_user(username, email, hashed_password)
-        print("Sign-up successful!")
+        log.info("Sign-up successful!")
 
     def login(self):
         """Logs in an existing user."""
@@ -97,46 +98,46 @@ class SmartHomeApp:
             stored_password = self.database.get_password(user_id)
             if stored_password == hashed_password:
                 self.logged_in_user_id = user_id
-                print(
-                    "Login successful! Welcome back, "
-                    f"{self.database.get_username(user_id)}."
+                log.info(
+                    "Login successful! Welcome back, %s.", 
+                    self.database.get_username(user_id)
                 )
                 return
         # To protect user's emails and passwords,
         # do not specify whether the password or email is incorrect.
-        print("Incorrect email or password.")
+        log.info("Incorrect email or password.")
 
     def update_email(self):
         """Updates the email of the logged-in user."""
         if self.logged_in_user_id is None:
-            print("You must be logged in to update your email.")
+            log.info("You must be logged in to update your email.")
             return
 
         new_email = input("Enter your new email: ")
         if not self.verify_email(new_email):
             return
         self.database.update_email(self.logged_in_user_id, new_email)
-        print("Email updated successfully!")
+        log.info("Email updated successfully!")
 
     def delete_user(self):
         """Deletes the logged in user"""
         if self.logged_in_user_id is None:
-            print("You must be logged in to delete your account.")
+            log.info("You must be logged in to delete your account.")
             return
 
         self.database.delete_user(self.logged_in_user_id)
         self.logged_in_user_id = None
-        print("User deleted successfully.")
+        log.info("User deleted successfully.")
 
     def start(self):
         """Main menu for the smart home app."""
         while True:
-            print("\nWelcome to the Smart Home App!")
-            print("1. Sign Up")
-            print("2. Log In")
-            print("3. Update Email")
-            print("4. Delete User")
-            print("5. Exit")
+            log.info("\nWelcome to the Smart Home App!")
+            log.info("1. Sign Up")
+            log.info("2. Log In")
+            log.info("3. Update Email")
+            log.info("4. Delete User")
+            log.info("5. Exit")
             choice = input("Choose an option: ")
 
             if choice == "1":
@@ -148,10 +149,10 @@ class SmartHomeApp:
             elif choice == "4":
                 self.delete_user()
             elif choice == "5":
-                print("Goodbye!")
+                log.info("Goodbye!")
                 break
             else:
-                print("Invalid option. Please try again.")
+                log.info("Invalid option. Please try again.")
 
 
 if __name__ == "__main__":

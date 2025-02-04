@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler()  # Logs to the terminal
 log.addHandler(handler)  # Adds handler to log
+log.setLevel(logging.INFO)
 
 # Base class for ORM models
 Base = declarative_base()
