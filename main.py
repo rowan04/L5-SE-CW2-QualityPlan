@@ -38,7 +38,6 @@ class SmartHomeApp:
         return False
 
     def verify_password(self, password, email):
-        weak_passwords = ["password", "123456", "qwerty", "abc123"]
 
         if len(password) < 8:
             log.info("Password must be at least 8 characters long.")
