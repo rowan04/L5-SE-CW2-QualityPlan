@@ -44,10 +44,6 @@ class SmartHomeApp:
             log.info("Password must be at least 8 characters long.")
             return False
 
-        if password.lower() in weak_passwords:
-            log.info("Password is too weak.")
-            return False
-
         if email == password.lower():
             log.info("Password cannot be the same as the email.")
             return False
