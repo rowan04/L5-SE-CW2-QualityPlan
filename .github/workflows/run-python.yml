@@ -28,14 +28,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-        # Run the Python Script
-      - name: Run Python Script
-        run: python python/main.py
+      # Lint code with Black
+      - name: Run Black Formatter Check
+        run: black --check .
 
-        # Check code quality
+      # Lint code with Flake8
+      - name: Run Flake8 Linter
+        run: flake8 .
+
+        # Check for syntax errors
       - name: Check Python Code Quality
-        run: python -m py_compile python/main.py
+        run: python -m py_compile main.py
 
         # Run pytest for tests directory
       - name: Run Pytest
