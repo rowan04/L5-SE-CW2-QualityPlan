@@ -34,7 +34,7 @@ class SmartHomeApp:
     def verify_email(self, email):
         if re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
             return True
-        log.info("email did not contain '@' and/or '.'")
+        log.info("email is not in a valid format. ")
         return False
 
     def verify_password(self, password, email):
