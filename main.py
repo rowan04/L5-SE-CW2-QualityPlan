@@ -128,12 +128,12 @@ class SmartHomeApp:
     def start(self):
         """Main menu for the smart home app."""
         while True:
-            log.info("\nWelcome to the Smart Home App!")
-            log.info("1. Sign Up")
-            log.info("2. Log In")
-            log.info("3. Update Email")
-            log.info("4. Delete User")
-            log.info("5. Exit")
+            print("\nWelcome to the Smart Home App!")
+            print("1. Sign Up")
+            print("2. Log In")
+            print("3. Update Email")
+            print("4. Delete User")
+            print("5. Exit")
             choice = input("Choose an option: ")
 
             if choice == "1":
