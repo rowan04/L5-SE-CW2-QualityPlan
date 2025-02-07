@@ -96,9 +96,8 @@ class AccessUserDatabase:
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 with DuplicateRecordError as exc:
-                    exc.response_detail = (
-                        "Failed to add new user: email already in use"
-                    )
+                    exc.response_detail = "Failed to add new user: "
+                    +"email already in use"
                     log.warning(exc.response_detail)
                     raise exc
 
@@ -127,9 +126,8 @@ class AccessUserDatabase:
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 with GetUserFromIdError as exc:
-                    exc.response_detail = (
-                        "Failed to delete user: user not found"
-                    )
+                    exc.response_detail = "Failed to delete user: "
+                    +"user not found"
                     log.warning(exc.response_detail)
                     raise exc
 
@@ -240,9 +238,8 @@ class AccessUserDatabase:
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 with GetUserFromIdError as exc:
-                    exc.response_detail = (
-                        "Failed to update email: user not found"
-                    )
+                    exc.response_detail = "Failed to update email: "
+                    +"user not found"
                     log.info(exc.response_detail)
                     raise exc
 
@@ -258,8 +255,8 @@ class AccessUserDatabase:
                         session.rollback()
                         log.error("Error: %s", e.orig)
                         with DuplicateRecordError as exc:
-                            exc.response_detail = "Failed to update email:"
-                            + "new email is already in use"
+                            exc.response_detail = "Failed to update email: "
+                            +"new email is already in use"
                             log.info(exc.response_detail)
                             raise exc
 
