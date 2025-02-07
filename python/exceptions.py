@@ -36,7 +36,7 @@ class DatabaseError(BaseException):
 class DatabaseIntegrityError(DatabaseError):
     """Exception raised when the relational integrity of the database is affected."""
 
-    response_detail = "Database integrity error raised"
+    response_detail = "Unexpected database integrity error raised"
 
 
 class DuplicateRecordError(DatabaseError):
@@ -54,4 +54,4 @@ class GetIdFromEmailError(DatabaseError):
 class GetUserFromIdError(DatabaseError):
     """Exception raised when the method to query a user based on their user ID failed."""
 
-    response_detail = "User not found"
+    response_detail = "Failed to get user - user with entered ID not found"

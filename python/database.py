@@ -64,6 +64,7 @@ class AccessUserDatabase:
                     return user.id
 
         except GetIdFromEmailError as exc:
+            log.warning(exc.response_detail)
             raise exc
 
     def add_user(self, username, email, hashed_password):
@@ -86,15 +87,19 @@ class AccessUserDatabase:
             try:
                 session.add(new_user)
                 session.commit()
-                log.info("User %s added successfully!", username)
 
             except IntegrityError as e:
-                # The Integrity Error is raised from SQLAlchemy, but we want to return a DuplicateRecordError
+                # The Integrity Error is raised from SQLAlchemy,
+                # but we want to return a DuplicateRecordError.
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 with DuplicateRecordError as exc:
-                    exc.response_detail = "Email already in use"
+                    exc.response_detail = "Failed to add new user: email already in use"
+                    log.warning(exc.response_detail)
                     raise exc
+
+            else:
+                log.info("User %s added successfully!", username)
 
     def remove_user(self, user_id):
         """
@@ -103,18 +108,26 @@ class AccessUserDatabase:
         :param user_id: The user_id to query by.
         :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
         """
-        try:
-            with self.Session() as session:
+        with self.Session() as session:
+            try:
                 user = session.query(User).filter_by(id=user_id).first()
 
                 if user:
                     session.delete(user)
                     session.commit()
-                    log.info("User with ID %s deleted.", user_id)
 
-        except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to delete user - user not found"
-            raise exc
+            except IntegrityError as e:
+                # The Integrity Error is raised from SQLAlchemy,
+                # but we want to return a GetUserFromIdError.
+                session.rollback()
+                log.error("Error: %s", e.orig)
+                with GetUserFromIdError as exc:
+                    exc.response_detail = "Failed to delete user: user not found"
+                    log.warning(exc.response_detail)
+                    raise exc
+
+            else:
+                log.info("User with ID %s deleted.", user_id)
 
     def get_password(self, user_id):
         """
@@ -132,7 +145,8 @@ class AccessUserDatabase:
                     return user.password_hash
 
         except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get password - user not found"
+            exc.response_detail = "Failed to get password: user not found"
+            log.warning(exc.response_detail)
             raise exc
 
     def get_username(self, user_id):
@@ -151,7 +165,8 @@ class AccessUserDatabase:
                     return user.username
 
         except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get username - user not found"
+            exc.response_detail = "Failed to get username: user not found"
+            log.warning(exc.response_detail)
             raise exc
 
     def get_email(self, user_id):
@@ -170,7 +185,8 @@ class AccessUserDatabase:
                     return user.email
 
         except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get email - user not found"
+            exc.response_detail = "Failed to get email: user not found"
+            log.info(exc.response_detail)
             raise exc
 
     def get_date_created(self, user_id):
@@ -188,7 +204,8 @@ class AccessUserDatabase:
                     return user.created_at
 
         except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get creation date - user not found"
+            exc.response_detail = "Failed to get creation date: user not found"
+            log.info(exc.response_detail)
             raise exc
 
     def update_email(self, user_id, new_email):
@@ -200,24 +217,35 @@ class AccessUserDatabase:
         :raises DuplicateRecordError: If the supplied `new_email` is already in use.
         :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
         """
-        try:
-            with self.Session() as session:
+        with self.Session() as session:
+            try:
                 user = session.query(User).filter_by(id=user_id).first()
 
+            except IntegrityError as e:
+                # The Integrity Error is raised from SQLAlchemy,
+                # but we want to return a GetUserFromIdError.
+                session.rollback()
+                log.error("Error: %s", e.orig)
+                with GetUserFromIdError as exc:
+                    exc.response_detail = "Failed to update email: user not found"
+                    log.info(exc.response_detail)
+                    raise exc
+
+            else:
                 if user:
                     try:
                         user.email = new_email
                         session.commit()
-                        log.info("User's email updated to %s", new_email)
 
                     except IntegrityError as e:
-                        # The Integrity Error is raised from SQLAlchemy, but we want to return a DuplicateRecordError
+                        # The Integrity Error is raised from SQLAlchemy,
+                        # but we want to return a DuplicateRecordError.
                         session.rollback()
                         log.error("Error: %s", e.orig)
                         with DuplicateRecordError as exc:
-                            exc.response_detail = "Email already in use"
+                            exc.response_detail = "Failed to update email: new email is already in use"
+                            log.info(exc.response_detail)
                             raise exc
 
-        except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to update email - user not found"
-            raise exc
+                    else:
+                        log.info("User's email updated to %s", new_email)
