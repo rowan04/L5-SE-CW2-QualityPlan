@@ -56,7 +56,7 @@ class GetIdFromEmailError(DatabaseError):
     """
 
     response_detail = "Failed to get user ID - "
-    +"user with entered email not found"
+    + "user with entered email not found"
 
 
 class GetUserFromIdError(DatabaseError):
