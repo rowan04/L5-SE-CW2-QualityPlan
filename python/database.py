@@ -54,7 +54,8 @@ class AccessUserDatabase:
 
         :param email: The email to query by.
         :return: the retrieved user ID if found.
-        :raises GetIdFromEmailError: If the supplied `email` is not associated with a user, or is invalid.
+        :raises GetIdFromEmailError: If the supplied `email`
+            is not associated with a user, or is invalid.
         """
         try:
             with self.Session() as session:
@@ -74,7 +75,8 @@ class AccessUserDatabase:
         :param username: The username of the new user.
         :param email: The email of the new user.
         :param hashed_password: The hashed password of the new user.
-        :raises DuplicateRecordError: If the supplied `email` is already in use.
+        :raises DuplicateRecordError: If the supplied `email`
+            is already in use.
         """
         new_user = User(
             username=username,
@@ -94,7 +96,9 @@ class AccessUserDatabase:
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 with DuplicateRecordError as exc:
-                    exc.response_detail = "Failed to add new user: email already in use"
+                    exc.response_detail = (
+                        "Failed to add new user: email already in use"
+                    )
                     log.warning(exc.response_detail)
                     raise exc
 
@@ -106,7 +110,8 @@ class AccessUserDatabase:
         Removes a user from the database using their ID.
 
         :param user_id: The user_id to query by.
-        :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
+        :raises GetUserFromIdError: If the supplied `user_id`
+            is not linked to a user, or is invalid.
         """
         with self.Session() as session:
             try:
@@ -122,7 +127,9 @@ class AccessUserDatabase:
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 with GetUserFromIdError as exc:
-                    exc.response_detail = "Failed to delete user: user not found"
+                    exc.response_detail = (
+                        "Failed to delete user: user not found"
+                    )
                     log.warning(exc.response_detail)
                     raise exc
 
@@ -135,7 +142,8 @@ class AccessUserDatabase:
 
         :param user_id: The user_id to query by.
         :return: the retrieved password hash if found.
-        :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
+        :raises GetUserFromIdError: If the supplied `user_id`
+            is not linked to a user, or is invalid.
         """
         try:
             with self.Session() as session:
@@ -155,7 +163,8 @@ class AccessUserDatabase:
 
         :param user_id: The user_id to query by.
         :return: the retrieved username if found.
-        :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
+        :raises GetUserFromIdError: If the supplied `user_id`
+            is not linked to a user, or is invalid.
         """
         try:
             with self.Session() as session:
@@ -175,7 +184,8 @@ class AccessUserDatabase:
 
         :param user_id: The user_id to query by.
         :return: the retrieved email if found.
-        :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
+        :raises GetUserFromIdError: If the supplied `user_id`
+            is not linked to a user, or is invalid.
         """
         try:
             with self.Session() as session:
@@ -195,7 +205,8 @@ class AccessUserDatabase:
 
         :param user_id: The user_id to query by.
         :return: the retrieved user creation date if found.
-        :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
+        :raises GetUserFromIdError: If the supplied `user_id`
+            is not linked to a user, or is invalid.
         """
         try:
             with self.Session() as session:
@@ -214,8 +225,10 @@ class AccessUserDatabase:
 
         :param user_id: The user_id to query by.
         :param new_email: The new email to be set for the user.
-        :raises DuplicateRecordError: If the supplied `new_email` is already in use.
-        :raises GetUserFromIdError: If the supplied `user_id` is not linked to a user, or is invalid.
+        :raises DuplicateRecordError: If the supplied `new_email`
+            is already in use.
+        :raises GetUserFromIdError: If the supplied `user_id`
+            is not linked to a user, or is invalid.
         """
         with self.Session() as session:
             try:
@@ -227,7 +240,9 @@ class AccessUserDatabase:
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 with GetUserFromIdError as exc:
-                    exc.response_detail = "Failed to update email: user not found"
+                    exc.response_detail = (
+                        "Failed to update email: user not found"
+                    )
                     log.info(exc.response_detail)
                     raise exc
 
@@ -243,7 +258,8 @@ class AccessUserDatabase:
                         session.rollback()
                         log.error("Error: %s", e.orig)
                         with DuplicateRecordError as exc:
-                            exc.response_detail = "Failed to update email: new email is already in use"
+                            exc.response_detail = "Failed to update email:"
+                            + "new email is already in use"
                             log.info(exc.response_detail)
                             raise exc
 
