@@ -42,7 +42,7 @@ class User(Base):
 
 class AccessUserDatabase:
     def __init__(self, db_url="sqlite:///database/user_database.db"):
-        self.engine = create_engine(db_url, echo=True)
+        self.engine = create_engine(db_url)
         self.Session = sessionmaker(bind=self.engine)
 
         # Create tables if they don't exist
