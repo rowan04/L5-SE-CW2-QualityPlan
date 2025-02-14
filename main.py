@@ -2,8 +2,6 @@
 Main functionality for the smart home app.
 """
 
-import logging
-
 from python.database import AccessUserDatabase
 import hashlib
 import re
@@ -12,12 +10,6 @@ from python.exceptions import (
     DuplicateRecordError,
     GetUserFromIdError,
 )
-
-log = logging.getLogger(__name__)
-handler = logging.StreamHandler()  # Logs to the terminal
-log.addHandler(handler)  # Adds handler to log
-log.setLevel(logging.INFO)  # Ensure INFO and above are logged
-handler.setLevel(logging.INFO)  # Ensure the handler also logs INFO and above
 
 
 class SmartHomeApp:
@@ -77,15 +69,12 @@ class SmartHomeApp:
         email = email.lower()
 
         if not self.verify_username(username):
-            log.warning("Username invalid.")
             return
 
         if not self.verify_email(email):
-            log.warning("Email invalid.")
             return
 
         if not self.verify_password(password, email):
-            log.warning("Password invalid.")
             return
 
         hashed_password = self.hash_password(password)
