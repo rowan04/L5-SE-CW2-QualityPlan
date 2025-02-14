@@ -45,7 +45,7 @@ class TestSmartHomeApp:
         # Password has no special characters
         assert self.app.verify_password("NoSpecial123", "user@example.com") is False
 
-        # Test what happens without lower case, upper case and diget
+        # Test what happens with just lower case, upper case or digits
         assert self.app.verify_password("PASSWORDUPPER", "user@example.com") is False
         assert self.app.verify_password("passwordlower", "user@example.com") is False
         assert self.app.verify_password("09295870693", "user@example.com") is False
