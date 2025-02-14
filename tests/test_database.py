@@ -21,10 +21,9 @@ def test_add_user_success(access_db):
     with patch('python.database.log.info') as mock_log:  # Patch the logger here
         # Try adding a new user
         access_db.add_user("newuser", "newuser@example.com", "hashed_password")
-        
+
         # Check if the success message was logged
         mock_log.assert_called_with("User %s added successfully!", "newuser")
-
 
 
 def test_add_user_duplicate_email(access_db):

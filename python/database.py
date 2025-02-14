@@ -96,7 +96,9 @@ class AccessUserDatabase:
                 session.rollback()
                 log.error("Error: %s", e.orig)
                 # Create the exception and raise it
-                exc = DuplicateRecordError("Failed to add new user: email already in use")
+                exc = DuplicateRecordError(
+                    "Failed to add new user: email already in use"
+                )
                 log.warning(exc.response_detail)  # Log the warning message
                 raise exc  # Raise the exception
 
@@ -124,7 +126,7 @@ class AccessUserDatabase:
                 # but we want to return a GetUserFromIdError.
                 session.rollback()
                 log.error("Error: %s", e.orig)
-                
+
                 exc = GetUserFromIdError("Failed to delete user: user not found")
                 log.warning(exc.response_detail)
                 raise exc
@@ -250,7 +252,9 @@ class AccessUserDatabase:
                         # but we want to return a DuplicateRecordError.
                         session.rollback()
                         log.error("Error: %s", e.orig)
-                        exc = DuplicateRecordError("Failed to update email: new email is already in use")
+                        exc = DuplicateRecordError(
+                            "Failed to update email: new email is already in use"
+                        )
                         log.info(exc.response_detail)
                         raise exc
 
