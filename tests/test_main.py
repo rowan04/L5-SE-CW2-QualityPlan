@@ -34,7 +34,6 @@ class TestSmartHomeApp:
     def test_verify_password(self):
         """Tests that verify_password successfully validates inputted passwords"""
         # Strong pasword
-
         assert self.app.verify_password("StrongP@ss123", "user@example.com") is True
 
         # Password too short
