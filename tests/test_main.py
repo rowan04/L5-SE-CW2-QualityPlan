@@ -15,7 +15,7 @@ class TestSmartHomeApp:
 
     def test_hash_password(self):
         """Tests the hashed password is returned properly"""
-        password = "SecurePassword123"
+        password = "SecurePassword123!"
         expected_hash = hashlib.sha256(password.encode()).hexdigest()
         assert self.app.hash_password(password) == expected_hash
 
