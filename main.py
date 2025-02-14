@@ -7,6 +7,11 @@ import logging
 from python.database import AccessUserDatabase
 import hashlib
 import re
+from python.exceptions import (
+    GetIdFromEmailError,
+    DuplicateRecordError,
+    GetUserFromIdError,
+)
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler()  # Logs to the terminal
@@ -28,23 +33,23 @@ class SmartHomeApp:
     def verify_username(self, username):
         if 1 < len(username) < 30:
             return True
-        log.info("username must be between 1 and 30 characters.")
+        print("Username must be between 1 and 30 characters.")
         return False
 
     def verify_email(self, email):
         if re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
             return True
-        log.info("email is not in a valid format. ")
+        print("Email is not in a valid format.")
         return False
 
     def verify_password(self, password, email):
 
         if len(password) < 8:
-            log.info("Password must be at least 8 characters long.")
+            print("Password must be at least 8 characters long.")
             return False
 
         if email == password.lower():
-            log.info("Password cannot be the same as the email.")
+            print("Password cannot be the same as the email.")
             return False
 
         SPECIAL_CHARS = "!@#$%^&*(){}[]_-+=£/\\|.,~¬'\""
@@ -55,9 +60,9 @@ class SmartHomeApp:
         has_special = any(c in SPECIAL_CHARS for c in password)
 
         if not (has_lower and has_upper and has_digit and has_special):
-            log.info(
+            print(
                 "Password must contain a mix of lowercase, uppercase, "
-                "digits, and special characters"
+                "digits, and special characters."
             )
             return False
 
@@ -72,18 +77,25 @@ class SmartHomeApp:
         email = email.lower()
 
         if not self.verify_username(username):
+            log.warning("Username invalid.")
             return
 
         if not self.verify_email(email):
+            log.warning("Email invalid.")
             return
 
         if not self.verify_password(password, email):
+            log.warning("Password invalid.")
             return
 
         hashed_password = self.hash_password(password)
 
-        self.database.add_user(username, email, hashed_password)
-        log.info("Sign-up successful!")
+        try:
+            self.database.add_user(username, email, hashed_password)
+        except DuplicateRecordError as exc:
+            print(exc.response_detail)
+        else:
+            print("Sign-up successful!")
 
     def login(self):
         """Logs in an existing user."""
@@ -91,41 +103,62 @@ class SmartHomeApp:
         password = input("Enter your password: ")
         hashed_password = self.hash_password(password)
 
-        user_id = self.database.get_id_from_email(email)
-        if user_id:
-            stored_password = self.database.get_password(user_id)
-            if stored_password == hashed_password:
-                self.logged_in_user_id = user_id
-                log.info(
-                    "Login successful! Welcome back, %s.",
-                    self.database.get_username(user_id),
-                )
-                return
+        try:
+            user_id = self.database.get_id_from_email(email)
+        except GetIdFromEmailError as exc:
+            print(exc.response_detail)
+        else:
+            if user_id:
+                try:
+                    stored_password = self.database.get_password(user_id)
+                except GetUserFromIdError as exc:
+                    print(exc.response_detail)
+                    # Return here as we don't want to print
+                    # the 'incorrect email or password' message.
+                    return
+                else:
+                    if stored_password == hashed_password:
+                        self.logged_in_user_id = user_id
+                        print(
+                            "Login successful! Welcome back, %s.",
+                            self.database.get_username(user_id),
+                        )
+                        return
+
         # To protect user's emails and passwords,
         # do not specify whether the password or email is incorrect.
-        log.info("Incorrect email or password.")
+        print("Incorrect email or password.")
 
     def update_email(self):
         """Updates the email of the logged-in user."""
         if self.logged_in_user_id is None:
-            log.info("You must be logged in to update your email.")
+            print("You must be logged in to update your email.")
             return
 
         new_email = input("Enter your new email: ")
         if not self.verify_email(new_email):
             return
-        self.database.update_email(self.logged_in_user_id, new_email)
-        log.info("Email updated successfully!")
+
+        try:
+            self.database.update_email(self.logged_in_user_id, new_email)
+        except GetUserFromIdError or DuplicateRecordError as exc:
+            print(exc.response_detail)
+        else:
+            print("Email updated successfully.")
 
     def delete_user(self):
         """Deletes the logged in user"""
         if self.logged_in_user_id is None:
-            log.info("You must be logged in to delete your account.")
+            print("You must be logged in to delete your account.")
             return
 
-        self.database.delete_user(self.logged_in_user_id)
-        self.logged_in_user_id = None
-        log.info("User deleted successfully.")
+        try:
+            self.database.remove_user(self.logged_in_user_id)
+            self.logged_in_user_id = None
+        except GetUserFromIdError as exc:
+            print(exc.response_detail)
+        else:
+            print("User deleted successfully.")
 
     def start(self):
         """Main menu for the smart home app."""
@@ -147,10 +180,10 @@ class SmartHomeApp:
             elif choice == "4":
                 self.delete_user()
             elif choice == "5":
-                log.info("Goodbye!")
+                print("Goodbye!")
                 break
             else:
-                log.info("Invalid option. Please try again.")
+                print("Invalid option. Please try again.")
 
 
 if __name__ == "__main__":
