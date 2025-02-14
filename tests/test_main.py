@@ -15,7 +15,7 @@ class TestSmartHomeApp:
 
     def test_hash_password(self):
         """Tests the hashed password is returned properly"""
-        password = "securepassword123"
+        password = "SecurePassword123"
         expected_hash = hashlib.sha256(password.encode()).hexdigest()
         assert self.app.hash_password(password) == expected_hash
 
@@ -33,8 +33,20 @@ class TestSmartHomeApp:
 
     def test_verify_password(self):
         """Tests that verify_password successfully validates inputted passwords"""
+        # Strong pasword
+
         assert self.app.verify_password("StrongP@ss123", "user@example.com") is True
+
+        # Password too short
         assert self.app.verify_password("short", "user@example.com") is False
+
+        # Password same as email
         assert self.app.verify_password("user@example.com", "user@example.com") is False
+
+        # Password has no special characters
         assert self.app.verify_password("NoSpecial123", "user@example.com") is False
-        assert self.app.verify_password("lowerUPPER123", "user@example.com") is False
+
+        # Test what happens without lower case, upper case and diget
+        assert self.app.verify_password("PASSWORDUPPER", "user@example.com") is False
+        assert self.app.verify_password("passwordlower", "user@example.com") is False
+        assert self.app.verify_password("09295870693", "user@example.com") is False

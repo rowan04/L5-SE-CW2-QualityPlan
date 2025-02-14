@@ -95,12 +95,11 @@ class AccessUserDatabase:
                 # but we want to return a DuplicateRecordError.
                 session.rollback()
                 log.error("Error: %s", e.orig)
-                # Create the exception and raise it
                 exc = DuplicateRecordError(
                     "Failed to add new user: email already in use"
                 )
-                log.warning(exc.response_detail)  # Log the warning message
-                raise exc  # Raise the exception
+                log.warning(exc.response_detail)
+                raise exc
 
             else:
                 log.info("User %s added successfully!", username)
