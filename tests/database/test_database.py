@@ -148,20 +148,3 @@ class TestUpdateEmail:
         # Try to update the email of a non-existing user
         with pytest.raises(GetUserFromIdError):
             access_db.update_email(user_id=1, new_email=new_email)
-
-
-"""
-User class?
-
-__init__?
-
-get_id_from_email (done)
-
-add_user (done)
-remove_user (done)
-
-get_user_info (done)
-
-update_email (done)
-
-"""

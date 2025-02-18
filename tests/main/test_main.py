@@ -2,8 +2,10 @@
 Unit tests for the Smart Home Automation App.
 """
 
+from unittest.mock import patch
 from main import SmartHomeApp
 import hashlib
+from python.exceptions import DuplicateRecordError
 
 
 class TestSmartHomeApp:
@@ -49,3 +51,47 @@ class TestSmartHomeApp:
         assert self.app.verify_password("PASSWORDUPPER", "user@example.com") is False
         assert self.app.verify_password("passwordlower", "user@example.com") is False
         assert self.app.verify_password("09295870693", "user@example.com") is False
+
+    # ----- Test sign_up -----
+
+    def test_sign_up_success(self, monkeypatch):
+        """
+        Tests that sign-up works when valid inputs are given
+        and the database operation succeeds.
+        """
+        mock_inputs = iter(["test_user", "test@example.com", "SecureP@ss123"])
+        monkeypatch.setattr("builtins.input", lambda _: next(mock_inputs))
+
+        with patch(
+            "python.database.AccessUserDatabase.add_user"
+        ) as mock_add_user, patch("builtins.print") as mock_print:
+            mock_add_user.return_value = None
+            self.app.sign_up()
+
+            mock_add_user.assert_called_once_with(
+                "test_user", "test@example.com", self.app.hash_password("SecureP@ss123")
+            )
+            mock_print.assert_called_once_with("Sign-up successful!")
+
+    def test_sign_up_duplicate_email(self, monkeypatch):
+        """Test that sign_up handles DuplicateRecordError correctly."""
+        mock_inputs = iter(["test_user", "test@example.com", "SecureP@ss123"])
+        monkeypatch.setattr("builtins.input", lambda _: next(mock_inputs))
+
+        # Patch the add_user method correctly to raise DuplicateRecordError
+        with patch(
+            "python.database.AccessUserDatabase.add_user",
+            side_effect=DuplicateRecordError(
+                "Failed to add new user: email already in use"
+            ),
+        ) as mock_add_user:
+
+            result = self.app.sign_up()
+
+            # Ensure that add_user was called with correct parameters
+            mock_add_user.assert_called_once_with(
+                "test_user", "test@example.com", self.app.hash_password("SecureP@ss123")
+            )
+
+            # Verify that sign-up returned early (no success message printed)
+            assert result is None
