@@ -127,6 +127,10 @@ class SmartHomeApp:
         new_email = input("Enter your new email: ")
         if not self.verify_email(new_email):
             return
+        if new_email == self.email:
+            raise DuplicateRecordError(
+                f"Failed to update email: new email {new_email} is already in use."
+            )
 
         try:
             self.database.update_email(self.logged_in_user_id, new_email)
