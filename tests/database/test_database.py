@@ -22,15 +22,15 @@ class TestGetIdFromEmail:
         # Assert that the correct user ID is returned
         assert user_id == 1
 
-    def test_get_id_from_email_not_found(self, access_db):
+    def test_get_id_from_email_not_found(self, access_db, create_user):
         """Test that a GetIdFromEmailError is raised when the email does not exist."""
 
         # Test that the exception is raised
         with pytest.raises(GetIdFromEmailError) as exc_info:
-            access_db.get_id_from_email(email="testuser@example.com")
+            access_db.get_id_from_email(email="fakeuser@example.com")
 
         # Check the exception message
-        assert str(exc_info.value) == "User with email testuser@example.com not found"
+        assert str(exc_info.value) == "User with email fakeuser@example.com not found"
 
 
 class TestAccessUserDatabase:
@@ -105,10 +105,10 @@ class TestGetUserInfo:
         # Checks a datetime is returned
         assert isinstance(created_at, datetime)
 
-    def test_get_user_not_found(self, access_db):
+    def test_get_user_not_found(self, access_db, create_user):
         """Test that a GetUserFromIdError is raised when the user does not exist."""
-        with pytest.raises(GetUserFromIdError, match="User with ID 1 not found"):
-            access_db.get_user_info(user_id=1, field="password_hash")
+        with pytest.raises(GetUserFromIdError, match="User with ID 2 not found"):
+            access_db.get_user_info(user_id=2, field="password_hash")
 
     def test_get_user_invalid_field(self, access_db, create_user):
         """Test that a ValueError is raised for an invalid field."""
@@ -140,11 +140,11 @@ class TestUpdateEmail:
         print(updated_email)
         assert updated_email == new_email
 
-    def test_update_email_user_not_found(self, access_db):
+    def test_update_email_user_not_found(self, access_db, create_user):
         """Test that a GetUserFromIdError is raised when the user does not exist."""
 
         new_email = "new_email@example.com"
 
         # Try to update the email of a non-existing user
         with pytest.raises(GetUserFromIdError):
-            access_db.update_email(user_id=1, new_email=new_email)
+            access_db.update_email(user_id=2, new_email=new_email)
