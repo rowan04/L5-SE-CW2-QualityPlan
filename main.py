@@ -81,8 +81,8 @@ class SmartHomeApp:
 
         try:
             self.database.add_user(username, email, hashed_password)
-        except DuplicateRecordError as exc:
-            print(exc.response_detail)
+        except DuplicateRecordError:
+            return
         else:
             print("Sign-up successful!")
 
@@ -94,28 +94,24 @@ class SmartHomeApp:
 
         try:
             user_id = self.database.get_id_from_email(email)
-        except GetIdFromEmailError as exc:
-            print(exc.response_detail)
+        except GetIdFromEmailError:
+            return
         else:
             if user_id:
                 try:
-                    stored_password = self.database.get_password(user_id)
-                except GetUserFromIdError as exc:
-                    print(exc.response_detail)
-                    # Return here as we don't want to print
-                    # the 'incorrect email or password' message.
+                    stored_password = self.database.get_user_info(
+                        user_id, field="password_hash"
+                    )
+                except GetUserFromIdError:
                     return
                 else:
                     if stored_password == hashed_password:
                         self.logged_in_user_id = user_id
-                        print(
-                            "Login successful! Welcome back, %s.",
-                            self.database.get_username(user_id),
+                        username = self.database.get_user_info(
+                            user_id, field="username"
                         )
+                        print(f"Login successful! Welcome back, {username}.")
                         return
-
-        # To protect user's emails and passwords,
-        # do not specify whether the password or email is incorrect.
         print("Incorrect email or password.")
 
     def update_email(self):
@@ -127,11 +123,22 @@ class SmartHomeApp:
         new_email = input("Enter your new email: ")
         if not self.verify_email(new_email):
             return
+        email = self.database.get_user_info(self.logged_in_user_id, field="email")
+        if new_email == email:
+            try:
+                raise DuplicateRecordError(
+                    f"Failed to update email: new email {new_email} is already in use."
+                )
+            except DuplicateRecordError as e:
+                print(e)
+                # Stay inside the loop and prompt for a new email or choice
+                # Would be different in an actual app not using a loop
+                return
 
         try:
             self.database.update_email(self.logged_in_user_id, new_email)
-        except GetUserFromIdError or DuplicateRecordError as exc:
-            print(exc.response_detail)
+        except GetUserFromIdError:
+            return
         else:
             print("Email updated successfully.")
 
@@ -144,8 +151,8 @@ class SmartHomeApp:
         try:
             self.database.remove_user(self.logged_in_user_id)
             self.logged_in_user_id = None
-        except GetUserFromIdError as exc:
-            print(exc.response_detail)
+        except GetUserFromIdError:
+            return
         else:
             print("User deleted successfully.")
 

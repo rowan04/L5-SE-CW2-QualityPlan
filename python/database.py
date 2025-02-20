@@ -63,6 +63,7 @@ class AccessUserDatabase:
 
                 if user:
                     return user.id
+                raise GetIdFromEmailError(f"User with email {email} not found")
 
         except GetIdFromEmailError as exc:
             log.warning(exc.response_detail)
@@ -119,101 +120,50 @@ class AccessUserDatabase:
                 if user:
                     session.delete(user)
                     session.commit()
+                    log.info("User with ID %s deleted.", user_id)
+                else:
+                    # Raise the error if the user is not found
+                    raise GetUserFromIdError(f"User with ID {user_id} not found")
 
             except IntegrityError as e:
-                # The Integrity Error is raised from SQLAlchemy,
-                # but we want to return a GetUserFromIdError.
                 session.rollback()
                 log.error("Error: %s", e.orig)
+                raise e
 
-                exc = GetUserFromIdError("Failed to delete user: user not found")
-                log.warning(exc.response_detail)
-                raise exc
-
-            else:
-                log.info("User with ID %s deleted.", user_id)
-
-    def get_password(self, user_id):
+    def get_user_info(self, user_id, field=None):
         """
-        Retrieves the password hash for a user.
+        Retrieves specific information for a user by their ID.
 
         :param user_id: The user_id to query by.
-        :return: the retrieved password hash if found.
+        :param field: The field to retrieve
+            (e.g., 'password_hash', 'username', 'email', 'created_at').
+        :return: the requested information if found.
         :raises GetUserFromIdError: If the supplied `user_id`
             is not linked to a user, or is invalid.
+        :raises ValueError: If the supplied `field` does not exist in the user model
         """
         try:
             with self.Session() as session:
                 user = session.query(User).filter_by(id=user_id).first()
 
                 if user:
-                    return user.password_hash
+                    # If no field is provided, return the entire user object
+                    if field is None:
+                        return user
+                    # Ensure the requested field is valid and return it
+                    elif hasattr(user, field):
+                        return getattr(user, field)
+                    else:
+                        raise ValueError(f"Invalid field: {field}")
 
-        except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get password: user not found"
-            log.warning(exc.response_detail)
-            raise exc
+                # If no user is found
+                raise GetUserFromIdError(f"User with ID {user_id} not found")
 
-    def get_username(self, user_id):
-        """
-        Retrieves the username for a user by their ID.
-
-        :param user_id: The user_id to query by.
-        :return: the retrieved username if found.
-        :raises GetUserFromIdError: If the supplied `user_id`
-            is not linked to a user, or is invalid.
-        """
-        try:
-            with self.Session() as session:
-                user = session.query(User).filter_by(id=user_id).first()
-
-                if user:
-                    return user.username
-
-        except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get username: user not found"
-            log.warning(exc.response_detail)
-            raise exc
-
-    def get_email(self, user_id):
-        """
-        Retrieves the email for a user by their ID.
-
-        :param user_id: The user_id to query by.
-        :return: the retrieved email if found.
-        :raises GetUserFromIdError: If the supplied `user_id`
-            is not linked to a user, or is invalid.
-        """
-        try:
-            with self.Session() as session:
-                user = session.query(User).filter_by(id=user_id).first()
-
-                if user:
-                    return user.email
-
-        except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get email: user not found"
-            log.info(exc.response_detail)
-            raise exc
-
-    def get_date_created(self, user_id):
-        """
-        Retrieves the creation date for a user by their ID.
-
-        :param user_id: The user_id to query by.
-        :return: the retrieved user creation date if found.
-        :raises GetUserFromIdError: If the supplied `user_id`
-            is not linked to a user, or is invalid.
-        """
-        try:
-            with self.Session() as session:
-                user = session.query(User).filter_by(id=user_id).first()
-                if user:
-                    return user.created_at
-
-        except GetUserFromIdError as exc:
-            exc.response_detail = "Failed to get creation date: user not found"
-            log.info(exc.response_detail)
+        except GetUserFromIdError:
+            log.warning("Failed to get user information: user not found")
+            raise
+        except ValueError as exc:
+            log.warning(str(exc))
             raise exc
 
     def update_email(self, user_id, new_email):
@@ -228,34 +178,20 @@ class AccessUserDatabase:
             is not linked to a user, or is invalid.
         """
         with self.Session() as session:
-            try:
-                user = session.query(User).filter_by(id=user_id).first()
+            user = self.get_user_info(user_id=user_id)
 
-            except IntegrityError as e:
-                # The Integrity Error is raised from SQLAlchemy,
-                # but we want to return a GetUserFromIdError.
-                session.rollback()
-                log.error("Error: %s", e.orig)
-                exc = GetUserFromIdError("Failed to update email: user not found")
-                log.info(exc.response_detail)
-                raise exc
+            if user:
+                try:
+                    session.add(user)
+                    user.email = new_email
+                    session.commit()
 
-            else:
-                if user:
-                    try:
-                        user.email = new_email
-                        session.commit()
+                except Exception as e:
+                    # Handle any database errors, rollback the session
+                    session.rollback()
+                    log.error("Error: %s", str(e))
+                    raise e
 
-                    except IntegrityError as e:
-                        # The Integrity Error is raised from SQLAlchemy,
-                        # but we want to return a DuplicateRecordError.
-                        session.rollback()
-                        log.error("Error: %s", e.orig)
-                        exc = DuplicateRecordError(
-                            "Failed to update email: new email is already in use"
-                        )
-                        log.info(exc.response_detail)
-                        raise exc
-
-                    else:
-                        log.info("User's email updated to %s", new_email)
+                else:
+                    # Log the success
+                    log.info("User's email updated to %s", new_email)
