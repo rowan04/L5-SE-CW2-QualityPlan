@@ -78,7 +78,7 @@ class TestSmartHomeApp:
         mock_inputs = iter(["test_user", "test@example.com", "SecureP@ss123"])
         monkeypatch.setattr("builtins.input", lambda _: next(mock_inputs))
 
-        # Patch the add_user method correctly to raise DuplicateRecordError
+        # Patch the add_user method to raise DuplicateRecordError
         with patch(
             "python.database.AccessUserDatabase.add_user",
             side_effect=DuplicateRecordError(
@@ -88,7 +88,6 @@ class TestSmartHomeApp:
 
             result = self.app.sign_up()
 
-            # Ensure that add_user was called with correct parameters
             mock_add_user.assert_called_once_with(
                 "test_user", "test@example.com", self.app.hash_password("SecureP@ss123")
             )
